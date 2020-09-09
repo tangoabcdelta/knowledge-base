@@ -101,7 +101,77 @@ const downloadedContent = await page.evaluate(async downloadUrl => {
 }, downloadUrl);
 ```
 
+## Response Interception
+* https://www.youtube.com/watch?v=EufdahOSJIc&feature=youtu.be&t=31m18s
+* by https://github.com/umaar
 
+### Use `request` event and `response` method
+**Credits:** https://github.com/puppeteer/puppeteer/issues/599#issuecomment-357458054
+```
+page.on('request', (request) => {
+    if (request.url() === "http://abc.com/a.js") {
+        request.respond({
+            status: 200,
+            contentType: 'application/javascript; charset=utf-8',
+            body: 'console.log(1);'
+        });
+    } else {
+        request.continue();
+    }
+});
+```
+### Another work-around
+**Credits:** https://github.com/puppeteer/puppeteer/issues/1229#issuecomment-357469434
+
+```js
+  import fetch from 'node-fetch'
+
+  const requestInterceptor = async (request) => {
+    const url = request.url()
+    const requestHeaders = request.headers()
+    const acceptHeader = requestHeaders.accept || ''
+    if (url.includes('some-website-with-csp.com') && (acceptHeader.includes('text/html'))) {
+      const cookiesList = await page.cookies(url)
+      const cookies = cookiesList.map(cookie => `${cookie.name}=${cookie.value}`).join('; ')
+      delete requestHeaders['x-devtools-emulate-network-conditions-client-id']
+      if (requestHeaders.Cookie) {
+        requestHeaders.cookie = requestHeaders.Cookie
+        delete requestHeaders.Cookie
+      }
+      const theseHeaders = Object.assign({'cookie': cookies}, requestHeaders, {'accept-language': 'en-US,en'})
+
+      const init = {
+        body: request.postData(),
+        headers: theseHeaders,
+        method: request.method(),
+        follow: 20,
+      }
+      const result = await fetch(
+        url,
+        init,
+      )
+      const resultHeaders = {}
+      result.headers.forEach((value, name) => {
+        if (name.toLowerCase() !== 'content-security-policy') {
+          resultHeaders[name] = value
+        } else {
+          console.log('CSP', `omitting CSP`, {originalCSP: value})
+        }
+      })
+      const buffer = await result.buffer()
+      await request.respond({
+        body: buffer,
+        resultHeaders,
+        status: result.status,
+      })
+    } else {
+      request.continue();
+    }
+  }
+
+  await page.setRequestInterception(true)
+  page.on('request', requestInterceptor)
+```
 
 
 
