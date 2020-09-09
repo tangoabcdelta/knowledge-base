@@ -1,9 +1,10 @@
 # Use puppeteer to download a file:
 
 ## Using an `iframe`
-** Description **:
+**Description:**
 
-Credits:
+
+**Credits:**
 https://github.com/puppeteer/puppeteer/issues/1888#issue-291077489
 https://github.com/puppeteer/puppeteer/issues/299#issuecomment-322862535
 
@@ -46,7 +47,7 @@ async function main() {
 
 
 ## Catch the responses and write the files to a location of your choice
-Credits: https://github.com/puppeteer/puppeteer/issues/299#issuecomment-328295644
+**Credits:** https://github.com/puppeteer/puppeteer/issues/299#issuecomment-328295644
 **Pro tip:** You may need to adjust the timing for your page. Waiting for the load event and networkidle might not be enough.
 
 ```
@@ -87,7 +88,7 @@ browser.close();
 
 
 ## Download a file if the URL is known before-hand
-Credits: https://github.com/puppeteer/puppeteer/issues/299#issuecomment-338240864
+**Credits:** https://github.com/puppeteer/puppeteer/issues/299#issuecomment-338240864
 
 * Call fetch in an `evaluate(...)`
 * `downloadUrl` is a string with the URL of the file you want to download.
